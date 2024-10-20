@@ -44,7 +44,7 @@
       top: 0;
       left: 50%;
       transform: translateX(-50%);
-      background-color:#1246b6; /* Red background */
+      background-color: #1246b6; /* Red background */
       color: white; /* White text */
       padding: 15px;
       z-index: 1000;
@@ -58,41 +58,39 @@
     .notification.show {
       display: block;
     }
+
     .modal {
-  display: none; /* Hidden by default */
-  position: fixed; /* Stay in place */
-  z-index: 1000; /* Sit on top */
-  left: 0;
-  top: 0;
-  width: 100%; /* Full width */
-  height: 100%; /* Full height */
-  overflow: auto; /* Enable scroll if needed */
-  background-color: rgb(0,0,0); /* Fallback color */
-  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
-}
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.4);
+    }
 
-.modal-content {
-  background-color: #fefefe;
-  margin: 15% auto; /* 15% from the top and centered */
-  padding: 20px;
-  border: 1px solid #888;
-  width: 300px; /* Could be more or less, depending on screen size */
-}
+    .modal-content {
+      background-color: #fefefe;
+      margin: 15% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 300px;
+    }
 
-.close {
-  color: #aaa;
-  float: right;
-  font-size: 28px;
-  font-weight: bold;
-}
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+    }
 
-.close:hover,
-.close:focus {
-  color: black;
-  text-decoration: none;
-  cursor: pointer;
-}
-
+    .close:hover,
+    .close:focus {
+      color: black;
+      text-decoration: none;
+      cursor: pointer;
+    }
   </style>
 </head>
 
@@ -108,7 +106,7 @@
         <div class="input-field">
           <i class="fas fa-lock"></i>
           <input type="password" id="login-password" placeholder="Password" required>
-          <i class="far fa-eye" id="toggleLoginPassword" style="margin-left: -30px; cursor: pointer;"></i>
+          <i class="far fa-eye" id="toggleLoginPassword" class="toggle-password"></i>
         </div>
         <input type="submit" value="Sign in" class="btn">
         <p class="forgot-pass"><a href="#" id="forgot-password-link">Forgot Password?</a></p>
@@ -127,7 +125,7 @@
         <div class="input-field">
           <i class="fas fa-lock"></i>
           <input type="password" id="pass" placeholder="Password" required>
-          <i class="far fa-eye" id="togglepass" style="margin-left: -30px; cursor: pointer;"></i>
+          <i class="far fa-eye" id="togglepass" class="toggle-password"></i>
         </div>
         <div id="password-strength">
           <span id="strength-text"></span>
@@ -138,6 +136,7 @@
         <input type="submit" value="Sign up" class="btn">
       </form>
     </div>
+
     <div class="panels-container">
       <div class="panel left-panel">
         <div class="content">
@@ -157,8 +156,9 @@
       </div>
     </div>
   </div>
+
   <!-- Forgot Password Modal -->
-<div id="forgot-password-modal" class="modal">
+  <div id="forgot-password-modal" class="modal">
     <div class="modal-content">
       <span class="close">&times;</span>
       <h2>Reset Password</h2>
@@ -168,34 +168,20 @@
       <div id="reset-notification" class="notification"></div>
     </div>
   </div>
-  
 
   <!-- Notification banner for error messages -->
   <div id="notification" class="notification"></div>
 
   <script>
-    const togglePassword = document.querySelector('#togglePassword');
-    const password = document.querySelector('#password');
-    const togglePass = document.querySelector('#togglepass');
-    const pass = document.querySelector('#pass');
-
-    function togglePasswordVisibility(passwordField, toggleIcon) {
-      toggleIcon.addEventListener('click', function () {
+    // Reusable function to toggle password visibility
+    document.querySelectorAll('.toggle-password').forEach(item => {
+      item.addEventListener('click', function () {
+        const passwordField = this.previousElementSibling;
         const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
         passwordField.setAttribute('type', type);
-        this.classList.toggle('fa-eye-slash'); // Toggle the eye/eye-slash icon
+        this.classList.toggle('fa-eye-slash');
       });
-    }
-
-    // For Sign-in form
-    const signInPassword = document.querySelector('#login-password');
-    const signInToggle = document.querySelector('#toggleLoginPassword');
-    togglePasswordVisibility(signInPassword, signInToggle);
-
-    // For Sign-up form
-    const signUpPassword = document.querySelector('#pass');
-    const signUpToggle = document.querySelector('#togglepass');
-    togglePasswordVisibility(signUpPassword, signUpToggle);
+    });
 
     // Mock existing emails
     const existingEmails = ["test@gmail.com", "user@gmail.com", "admin@gmail.com"];
@@ -205,184 +191,112 @@
       const notification = document.getElementById('notification');
       notification.textContent = message;
       notification.classList.add('show');
-
-      // Automatically hide the notification after 3 seconds
       setTimeout(() => {
         notification.classList.remove('show');
       }, 3000);
     }
 
-    // Validate sign-up form
-    document.getElementById('signup-form').addEventListener('submit', function (e) {
-      const emailField = document.getElementById('email');
-      const passwordField = document.getElementById('pass');
+    // Email validation regex to allow any domain
+    const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
-      // Email validation
-      const emailPattern = /^[a-zA-Z0-9._%+-]{2,}@[gmail]+\.[com]+$/; // Check for __@gmail.com format
-      const isEmailValid = emailPattern.test(emailField.value);
-
-      // Password validation (format requirements)
-      const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/; // At least 8 characters, 1 upper, 1 lower, 1 number, 1 special character
-      const isPasswordValid = passwordPattern.test(passwordField.value);
-
-      // Combined validation for both email and password
-      if (!isEmailValid && !isPasswordValid) {
-        showNotification('Invalid email format and password. Please follow the requirements.'); // Show combined notification
-        e.preventDefault();
-        return;
-      } else if (!isEmailValid) {
-        showNotification('Please enter a valid email address in the format __@gmail.com.'); // Show notification for invalid email
-        e.preventDefault();
-        return;
-      } else if (!isPasswordValid) {
-        showNotification('Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character.'); // Show notification for password format
-        e.preventDefault();
-        return;
-      }
-
-      // Check if email already exists
-      if (existingEmails.includes(emailField.value)) {
-        showNotification('Email already exists. Please use a different email.'); // Show notification for existing email
-        e.preventDefault();
-        return;
-      }
-
-      // If validation passes, proceed (you can send data to your server here)
-      alert('Sign up successful!'); // For testing
-    });
-
-    // Validate sign-in form
+    // Sign-in form validation
     document.getElementById('login-form').addEventListener('submit', function (e) {
-      const emailField = document.getElementById('login-email');
-      const passwordField = document.getElementById('login-password');
+      e.preventDefault();
+      const loginEmail = document.getElementById('login-email').value;
+      const loginPassword = document.getElementById('login-password').value;
 
-      // Email validation
-      const emailPattern = /^[a-zA-Z0-9._%+-]{2,}@[gmail]+\.[com]+$/; // Check for __@gmail.com format
-      const isEmailValid = emailPattern.test(emailField.value);
-
-      // Password validation (format requirements)
-      const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/; // At least 8 characters, 1 upper, 1 lower, 1 number, 1 special character
-      const isPasswordValid = passwordPattern.test(passwordField.value);
-
-      // Combined validation for both email and password
-      if (!isEmailValid && !isPasswordValid) {
-        showNotification('Invalid email format and password. Please follow the requirements.'); // Show combined notification
-        e.preventDefault();
-        return;
-      } else if (!isEmailValid) {
-        showNotification('Please enter a valid email address in the format __@gmail.com.'); // Show notification for invalid email
-        e.preventDefault();
-        return;
-      } else if (!isPasswordValid) {
-        showNotification('Password must be at least 8 characters long and contain at least one uppercase letter, lowercase letter, number, and special character.'); // Show notification for password format
-        e.preventDefault();
+      if (loginPassword.length < 8) {
+        showNotification("Password must be at least 8 characters long.");
         return;
       }
 
-      // If validation passes, proceed (you can send data to your server here)
-      alert('Sign in successful!'); // For testing
+      if (!emailPattern.test(loginEmail)) {
+        showNotification("Please enter a valid email address.");
+        return;
+      }
+
+      if (existingEmails.includes(loginEmail)) {
+        showNotification("Login successful!");
+      } else {
+        showNotification("Invalid login credentials.");
+      }
     });
 
-    // Password strength indicator
-    const passwordInput = document.getElementById('pass');
-    const strengthIndicator = document.getElementById('strength-indicator');
-    const strengthText = document.getElementById('strength-text');
+    // Sign-up form validation
+    document.getElementById('signup-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('pass').value;
 
-    passwordInput.addEventListener('input', function () {
-      const value = passwordInput.value;
+      if (!emailPattern.test(email)) {
+        showNotification("Please enter a valid email address.");
+        return;
+      }
+
+      if (existingEmails.includes(email)) {
+        showNotification("Email already exists.");
+        return;
+      }
+
+      showNotification("Sign-up successful!");
+    });
+
+    // Password strength indicator logic
+    document.getElementById('pass').addEventListener('input', function () {
+      const password = this.value;
+      const strengthIndicator = document.getElementById('strength-indicator');
+      const strengthText = document.getElementById('strength-text');
+      const length = password.length;
+      const hasUpper = /[A-Z]/.test(password);
+      const hasLower = /[a-z]/.test(password);
+      const hasNumber = /[0-9]/.test(password);
+      const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password);
       let strength = 0;
 
-      if (value.length >= 8) strength++; // Minimum length
-      if (/[A-Z]/.test(value)) strength++; // Uppercase letter
-      if (/[a-z]/.test(value)) strength++; // Lowercase letter
-      if (/[0-9]/.test(value)) strength++; // Number
-      if (/[^A-Za-z0-9]/.test(value)) strength++; // Special character
+      if (length >= 8) strength++;
+      if (hasUpper) strength++;
+      if (hasLower) strength++;
+      if (hasNumber) strength++;
+      if (hasSpecial) strength++;
 
-      switch (strength) {
-        case 0:
-          strengthText.textContent = '';
-          strengthIndicator.style.width = '0%';
-          break;
-        case 1:
-          strengthText.textContent = 'Very Weak';
-          strengthIndicator.style.width = '25%';
-          strengthIndicator.style.background = 'red';
-          break;
-        case 2:
-          strengthText.textContent = 'Weak';
-          strengthIndicator.style.width = '50%';
-          strengthIndicator.style.background = 'orange';
-          break;
-        case 3:
-          strengthText.textContent = 'Strong';
-          strengthIndicator.style.width = '75%';
-          strengthIndicator.style.background = 'yellow';
-          break;
-        case 4:
-          strengthText.textContent = 'Very Strong';
-          strengthIndicator.style.width = '100%';
-          strengthIndicator.style.background = 'green';
-          break;
+      const strengthColors = ['red', 'orange', 'yellow', 'blue', 'green'];
+      const strengthMessages = ['Very Weak', 'Weak', 'Medium', 'Strong', 'Very Strong'];
+
+      strengthIndicator.style.width = (strength / 5) * 100 + '%';
+      strengthIndicator.style.backgroundColor = strengthColors[strength - 1];
+      strengthText.textContent = strengthMessages[strength - 1];
+      strengthText.style.color = strengthColors[strength - 1];
+    });
+
+    // Forgot Password modal handling
+    const forgotPasswordLink = document.getElementById('forgot-password-link');
+    const forgotPasswordModal = document.getElementById('forgot-password-modal');
+    const closeBtn = document.querySelector('.close');
+
+    forgotPasswordLink.addEventListener('click', function (e) {
+      e.preventDefault();
+      forgotPasswordModal.style.display = 'block';
+    });
+
+    closeBtn.addEventListener('click', function () {
+      forgotPasswordModal.style.display = 'none';
+    });
+
+    window.addEventListener('click', function (event) {
+      if (event.target === forgotPasswordModal) {
+        forgotPasswordModal.style.display = 'none';
       }
     });
 
-    // Toggle between sign-in and sign-up forms
-    const signUpBtn = document.getElementById('sign-up-btn');
-    const signInBtn = document.getElementById('sign-in-btn');
-    const container = document.querySelector('.container');
-
-    signUpBtn.addEventListener('click', () => {
-      container.classList.add('sign-up-mode');
+    // Handle Reset Link functionality
+    document.getElementById('send-reset-link').addEventListener('click', function () {
+      const email = document.getElementById('forgot-email').value;
+      if (emailPattern.test(email)) {
+        showNotification("Password reset link sent to your email.");
+      } else {
+        showNotification("Please enter a valid email address.");
+      }
     });
-
-    signInBtn.addEventListener('click', () => {
-      container.classList.remove('sign-up-mode');
-    });
-    // Modal functionality for Forgot Password
-const forgotPasswordLink = document.getElementById('forgot-password-link');
-const modal = document.getElementById('forgot-password-modal');
-const closeModal = document.querySelector('.close');
-const sendResetLinkButton = document.getElementById('send-reset-link');
-const resetNotification = document.getElementById('reset-notification');
-
-// Open the modal
-forgotPasswordLink.addEventListener('click', function (e) {
-  e.preventDefault(); // Prevent the default action
-  modal.style.display = 'block'; // Show the modal
-});
-
-// Close the modal
-closeModal.addEventListener('click', function () {
-  modal.style.display = 'none'; // Hide the modal
-});
-
-// Close the modal when clicking outside of it
-window.addEventListener('click', function (event) {
-  if (event.target === modal) {
-    modal.style.display = 'none';
-  }
-});
-
-// Handle the sending of the reset link
-sendResetLinkButton.addEventListener('click', function () {
-  const forgotEmail = document.getElementById('forgot-email');
-
-  if (forgotEmail.value) {
-    // Simulate sending a reset link (here you can add your actual email sending logic)
-    resetNotification.textContent = 'A password reset link has been sent to ' + forgotEmail.value;
-    resetNotification.classList.add('show');
-
-    // Automatically hide the notification after 3 seconds
-    setTimeout(() => {
-      resetNotification.classList.remove('show');
-      modal.style.display = 'none'; // Close modal after sending the link
-    }, 3000);
-  } else {
-    resetNotification.textContent = 'Please enter a valid email address.';
-    resetNotification.classList.add('show');
-  }
-});
-
   </script>
 </body>
 
